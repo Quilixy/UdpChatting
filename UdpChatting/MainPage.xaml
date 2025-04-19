@@ -5,13 +5,25 @@
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="10">
-            <Entry x:Name="ipEntry" Placeholder="Hedef IP Adresi" />
-            <Entry x:Name="messageEntry" Placeholder="Mesaj" />
-            <Button Text="Gönder" Clicked="OnSendClicked"/>
+            <Entry x:Name="ipEntry" 
+                   Placeholder="Hedef IP Adresi" />
+            
+            <Entry x:Name="usernameEntry" 
+                   Placeholder="Gönderen Kullanıcı Adı" />
+            
+            <Entry x:Name="messageEntry" 
+                   Placeholder="Mesaj" 
+                   Completed="OnSendClicked"/>
+            
+            <Button Text="Gönder" 
+                    Clicked="OnSendClicked"/>
     
-            <Label Text="Gelen Mesajlar:" FontAttributes="Bold"/>
+            <Label Text="Gelen Mesajlar:" 
+                   FontAttributes="Bold"/>
+            
             <ScrollView>
-                <Label x:Name="messagesLabel" LineBreakMode="WordWrap"/>
+                   <Label x:Name="messagesLabel" 
+                          LineBreakMode="WordWrap"/>
             </ScrollView>
         </VerticalStackLayout>
     </ScrollView>

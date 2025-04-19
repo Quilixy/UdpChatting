@@ -7,7 +7,7 @@ namespace UdpChatting;
 public partial class MainPage : ContentPage
 {
     private UdpClient udpClient;
-    private int localPort = 11000; // Dinleme yapılacak port
+    private int localPort = 11000;
 
     public MainPage()
     {
@@ -20,13 +20,15 @@ public partial class MainPage : ContentPage
         try
         {
             string ipAddress = ipEntry.Text;
+            string username = usernameEntry.Text;
             string message = messageEntry.Text;
+            string fullMessage = $"{username}:{message}";
 
-            if (string.IsNullOrWhiteSpace(ipAddress) || string.IsNullOrWhiteSpace(message))
+            if (string.IsNullOrWhiteSpace(ipAddress) || string.IsNullOrWhiteSpace(fullMessage))
                 return;
 
             var remoteEndpoint = new IPEndPoint(IPAddress.Parse(ipAddress), localPort);
-            byte[] sendBytes = Encoding.UTF8.GetBytes(message);
+            byte[] sendBytes = Encoding.UTF8.GetBytes(fullMessage);
 
             using (UdpClient senderClient = new UdpClient())
             {
@@ -50,12 +52,16 @@ public partial class MainPage : ContentPage
             while (true)
             {
                 var result = await udpClient.ReceiveAsync();
-                string receivedMessage = Encoding.UTF8.GetString(result.Buffer);
+                string receivedFullMessage = Encoding.UTF8.GetString(result.Buffer);
+                string[] splittedMessage = receivedFullMessage.Split(':', 2);
+                string senderUserName = splittedMessage.Length > 1 ? splittedMessage[0] : "Bilinmiyor";
+                string receivedMessage = splittedMessage.Length > 1 ? splittedMessage[1] : "Bilinmiyor";
                 string senderIp = result.RemoteEndPoint.Address.ToString();
+                
 
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    messagesLabel.Text += $"[Geldi <- {senderIp}] {receivedMessage}\n";
+                    messagesLabel.Text += $"[Geldi <- {senderUserName}:({senderIp})] {receivedMessage}\n";
                 });
             }
         }
