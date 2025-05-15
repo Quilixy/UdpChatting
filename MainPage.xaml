@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="UdpChatting.MainPage">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="10">
+            <Entry x:Name="ipEntry" 
+                   Placeholder="Hedef IP Adresi" />
+            
+            <Entry x:Name="usernameEntry" 
+                   Placeholder="Gönderen Kullanıcı Adı" />
+            
+            <Entry x:Name="messageEntry" 
+                   Placeholder="Mesaj" 
+                   Completed="OnSendClicked"/>
+            
+            <Button Text="Gönder" 
+                    Clicked="OnSendClicked"/>
+    
+            <Label Text="Gelen Mesajlar:" 
+                   FontAttributes="Bold"/>
+            
+            <ScrollView>
+                <Label x:Name="messagesLabel" 
+                       LineBreakMode="WordWrap"/>
+            </ScrollView>
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
