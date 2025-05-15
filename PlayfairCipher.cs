@@ -1,150 +1,153 @@
-﻿using System.Text;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
-
-namespace UdpChatting;
-class PlayfairCipher
+namespace UdpChatting
 {
-    private static readonly char[] Alphabet = "ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZXWQ().,".ToCharArray();
-    private const int Size = 6;
-    private static char[,] matrix = new char[Size, Size];
-
-    public PlayfairCipher(string keyword)
+    class PlayfairCipher
     {
-        GenerateMatrix(keyword);
-    }
+        private static readonly char[] Alphabet = "ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZXWQ().,".ToCharArray();
+        private const int Size = 6;
+        private static char[,] matrix = new char[Size, Size];
 
-    private void GenerateMatrix(string keyword)
-    {
-        var cleanKeyword = new string(keyword
-            .ToUpper()
-            .Where(c => Alphabet.Contains(c))
-            .Distinct()
-            .ToArray());
-
-        var fullKey = cleanKeyword + new string(Alphabet.Where(c => !cleanKeyword.Contains(c)).ToArray());
-
-        for (int i = 0; i < Size * Size; i++)
+        public PlayfairCipher(string keyword)
         {
-            matrix[i / Size, i % Size] = fullKey[i];
+            GenerateMatrix(keyword);
         }
-    }
 
-    private static (int row, int col) FindPosition(char ch)
-    {
-        for (int row = 0; row < Size; row++)
-            for (int col = 0; col < Size; col++)
-                if (matrix[row, col] == ch)
-                    return (row, col);
-        throw new Exception("Harf matris içinde bulunamadı: " + ch);
-    }
-
-    private static List<(char, char)> PrepareDigraphs(string text)
-    {
-        List<(char, char)> digraphs = new();
-        var cleanText = new string(text.ToUpper().Where(c => Alphabet.Contains(c)).ToArray());
-
-        for (int i = 0; i < cleanText.Length; i++)
+        private void GenerateMatrix(string keyword)
         {
-            char a = cleanText[i];
-            char b = (i + 1 < cleanText.Length) ? cleanText[i + 1] : 'X';
+            var cleanKeyword = new string(keyword
+                .ToUpper(new CultureInfo("tr-TR", false))
+                .Where(c => Alphabet.Contains(c))
+                .Distinct()
+                .ToArray());
 
-            if (a == b)
+            var fullKey = cleanKeyword + new string(Alphabet.Where(c => !cleanKeyword.Contains(c)).ToArray());
+
+            for (int i = 0; i < Size * Size; i++)
             {
-                digraphs.Add((a, 'X'));
-            }
-            else
-            {
-                digraphs.Add((a, b));
-                i++; // İkili harf kullandık, i'yi artır
+                matrix[i / Size, i % Size] = fullKey[i];
             }
         }
 
-        if (digraphs.Last().Item2 == 'X' && cleanText.Length % 2 == 1)
+        private static (int row, int col) FindPosition(char ch)
         {
-            digraphs.Add((cleanText.Last(), 'X'));
+            for (int row = 0; row < Size; row++)
+                for (int col = 0; col < Size; col++)
+                    if (matrix[row, col] == ch)
+                        return (row, col);
+            throw new Exception("Harf matris içinde bulunamadı: " + ch);
         }
 
-        return digraphs;
-    }
-
-    public static string Encrypt(string plaintext)
-    {
-        var digraphs = PrepareDigraphs(plaintext);
-        StringBuilder sb = new();
-
-        foreach (var (a, b) in digraphs)
+        private static List<(char, char)> PrepareDigraphs(string text)
         {
-            var (row1, col1) = FindPosition(a);
-            var (row2, col2) = FindPosition(b);
+            List<(char, char)> digraphs = new();
+            var cleanText = new string(text
+                .ToUpper(new CultureInfo("tr-TR", false))
+                .Where(c => Alphabet.Contains(c))
+                .ToArray());
 
-            if (row1 == row2)
+            for (int i = 0; i < cleanText.Length; i++)
             {
-                sb.Append(matrix[row1, (col1 + 1) % Size]);
-                sb.Append(matrix[row2, (col2 + 1) % Size]);
+                char a = cleanText[i];
+                char b = (i + 1 < cleanText.Length) ? cleanText[i + 1] : 'X';
+
+                if (a == b)
+                {
+                    digraphs.Add((a, 'X'));
+                }
+                else
+                {
+                    digraphs.Add((a, b));
+                    i++; // İkili harf kullandık, i'yi artır
+                }
             }
-            else if (col1 == col2)
+
+            if (cleanText.Length % 2 == 1)
             {
-                sb.Append(matrix[(row1 + 1) % Size, col1]);
-                sb.Append(matrix[(row2 + 1) % Size, col2]);
+                digraphs.Add((cleanText.Last(), 'X'));
             }
-            else
-            {
-                sb.Append(matrix[row1, col2]);
-                sb.Append(matrix[row2, col1]);
-            }
+
+            return digraphs;
         }
 
-        return sb.ToString();
-    }
-
-    public static string Decrypt(string ciphertext)
-    {
-        List<(char, char)> digraphs = new();
-        for (int i = 0; i < ciphertext.Length; i += 2)
+        public static string Encrypt(string plaintext)
         {
-            digraphs.Add((ciphertext[i], ciphertext[i + 1]));
+            var digraphs = PrepareDigraphs(plaintext);
+            StringBuilder sb = new();
+
+            foreach (var (a, b) in digraphs)
+            {
+                var (row1, col1) = FindPosition(a);
+                var (row2, col2) = FindPosition(b);
+
+                if (row1 == row2)
+                {
+                    sb.Append(matrix[row1, (col1 + 1) % Size]);
+                    sb.Append(matrix[row2, (col2 + 1) % Size]);
+                }
+                else if (col1 == col2)
+                {
+                    sb.Append(matrix[(row1 + 1) % Size, col1]);
+                    sb.Append(matrix[(row2 + 1) % Size, col2]);
+                }
+                else
+                {
+                    sb.Append(matrix[row1, col2]);
+                    sb.Append(matrix[row2, col1]);
+                }
+            }
+
+            return sb.ToString();
         }
 
-        StringBuilder sb = new();
-
-        foreach (var (a, b) in digraphs)
+        public static string Decrypt(string ciphertext)
         {
-            var (row1, col1) = FindPosition(a);
-            var (row2, col2) = FindPosition(b);
+            List<(char, char)> digraphs = new();
+            for (int i = 0; i < ciphertext.Length; i += 2)
+            {
+                digraphs.Add((ciphertext[i], ciphertext[i + 1]));
+            }
 
-            if (row1 == row2)
+            StringBuilder sb = new();
+
+            foreach (var (a, b) in digraphs)
             {
-                sb.Append(matrix[row1, (col1 + Size - 1) % Size]);
-                sb.Append(matrix[row2, (col2 + Size - 1) % Size]);
+                var (row1, col1) = FindPosition(a);
+                var (row2, col2) = FindPosition(b);
+
+                if (row1 == row2)
+                {
+                    sb.Append(matrix[row1, (col1 + Size - 1) % Size]);
+                    sb.Append(matrix[row2, (col2 + Size - 1) % Size]);
+                }
+                else if (col1 == col2)
+                {
+                    sb.Append(matrix[(row1 + Size - 1) % Size, col1]);
+                    sb.Append(matrix[(row2 + Size - 1) % Size, col2]);
+                }
+                else
+                {
+                    sb.Append(matrix[row1, col2]);
+                    sb.Append(matrix[row2, col1]);
+                }
             }
-            else if (col1 == col2)
-            {
-                sb.Append(matrix[(row1 + Size - 1) % Size, col1]);
-                sb.Append(matrix[(row2 + Size - 1) % Size, col2]);
-            }
-            else
-            {
-                sb.Append(matrix[row1, col2]);
-                sb.Append(matrix[row2, col1]);
-            }
+
+            return sb.ToString();
         }
 
-        return sb.ToString();
-    }
-
-    public void PrintMatrix()
-    {
-        Console.WriteLine("Playfair Matrisi:");
-        for (int i = 0; i < Size; i++)
+        public void PrintMatrix()
         {
-            for (int j = 0; j < Size; j++)
-                Console.Write(matrix[i, j] + " ");
-            Console.WriteLine();
+            Console.WriteLine("Playfair Matrisi:");
+            for (int i = 0; i < Size; i++)
+            {
+                for (int j = 0; j < Size; j++)
+                    Console.Write(matrix[i, j] + " ");
+                Console.WriteLine();
+            }
         }
     }
 }
-

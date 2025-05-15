@@ -5,8 +5,17 @@
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="10">
+            <Label Text="Cihaz IP Adresi:"
+                   FontSize="18"
+                   HorizontalOptions="Center" />
+        
+            <Label Text="{Binding LocalIp}"
+                   FontSize="16"
+                   TextColor="Gray"
+                   HorizontalOptions="Center" />
+            
             <Entry x:Name="ipEntry" 
-                   Placeholder="Hedef IP Adresi" />
+                      Placeholder="Hedef IP Adresi" />
             
             <Entry x:Name="usernameEntry" 
                    Placeholder="Gönderen Kullanıcı Adı" />

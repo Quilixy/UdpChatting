@@ -8,11 +8,13 @@ public partial class MainPage : ContentPage
 {
     private UdpClient udpClient;
     private int localPort = 11000;
+    public string LocalIp { get; set; }
 
     public MainPage()
     {
         InitializeComponent();
         StartListening();
+        LocalIp  = WiFiService.GetLocalIpAddress();
         string keyword = "GİZLİANAHTAR";
         var playfair = new PlayfairCipher(keyword);
         playfair.PrintMatrix();
