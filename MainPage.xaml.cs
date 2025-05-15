@@ -9,15 +9,18 @@ public partial class MainPage : ContentPage
     private UdpClient udpClient;
     private int localPort = 11000;
     public string LocalIp { get; set; }
+    private PlayfairCipher playfair;
 
     public MainPage()
     {
         InitializeComponent();
-        StartListening();
-        LocalIp  = WiFiService.GetLocalIpAddress();
-        string keyword = "GİZLİANAHTAR";
-        var playfair = new PlayfairCipher(keyword);
+        
+
+        LocalIp = WiFiService.GetLocalIpAddress();
+        BindingContext = this;
+        playfair = new PlayfairCipher("R.I.P.ALBERT(CAT)");
         playfair.PrintMatrix();
+        StartListening();
     }
 
     private async void OnSendClicked(object sender, EventArgs e)
@@ -27,7 +30,8 @@ public partial class MainPage : ContentPage
             string ipAddress = ipEntry.Text;
             string username = usernameEntry.Text;
             string message = messageEntry.Text;
-            string encryptedMessage = PlayfairCipher.Encrypt(message);
+
+            string encryptedMessage = playfair.Encrypt(message);
             string fullMessage = $"{username}:{encryptedMessage}";
 
             if (string.IsNullOrWhiteSpace(ipAddress) || string.IsNullOrWhiteSpace(fullMessage))
@@ -62,9 +66,8 @@ public partial class MainPage : ContentPage
                 string[] splittedMessage = receivedFullMessage.Split(':', 2);
                 string senderUserName = splittedMessage.Length > 1 ? splittedMessage[0] : "Bilinmiyor";
                 string receivedCryptedMessage = splittedMessage.Length > 1 ? splittedMessage[1] : "Bilinmiyor";
-                string receivedMessage = PlayfairCipher.Decrypt(receivedCryptedMessage);
+                string receivedMessage = playfair.Decrypt(receivedCryptedMessage);
                 string senderIp = result.RemoteEndPoint.Address.ToString();
-                
 
                 MainThread.BeginInvokeOnMainThread(() =>
                 {

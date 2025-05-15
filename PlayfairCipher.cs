@@ -10,7 +10,7 @@ namespace UdpChatting
     {
         private static readonly char[] Alphabet = "ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZXWQ().,".ToCharArray();
         private const int Size = 6;
-        private static char[,] matrix = new char[Size, Size];
+        private readonly char[,] matrix = new char[Size, Size];
 
         public PlayfairCipher(string keyword)
         {
@@ -20,7 +20,7 @@ namespace UdpChatting
         private void GenerateMatrix(string keyword)
         {
             var cleanKeyword = new string(keyword
-                .ToUpper(new CultureInfo("tr-TR", false))
+                .ToUpper(new CultureInfo("tr-TR"))
                 .Where(c => Alphabet.Contains(c))
                 .Distinct()
                 .ToArray());
@@ -33,7 +33,7 @@ namespace UdpChatting
             }
         }
 
-        private static (int row, int col) FindPosition(char ch)
+        private (int row, int col) FindPosition(char ch)
         {
             for (int row = 0; row < Size; row++)
                 for (int col = 0; col < Size; col++)
@@ -42,7 +42,7 @@ namespace UdpChatting
             throw new Exception("Harf matris içinde bulunamadı: " + ch);
         }
 
-        private static List<(char, char)> PrepareDigraphs(string text)
+        private List<(char, char)> PrepareDigraphs(string text)
         {
             List<(char, char)> digraphs = new();
             var cleanText = new string(text
@@ -50,7 +50,8 @@ namespace UdpChatting
                 .Where(c => Alphabet.Contains(c))
                 .ToArray());
 
-            for (int i = 0; i < cleanText.Length; i++)
+            int i = 0;
+            while (i < cleanText.Length)
             {
                 char a = cleanText[i];
                 char b = (i + 1 < cleanText.Length) ? cleanText[i + 1] : 'X';
@@ -58,23 +59,26 @@ namespace UdpChatting
                 if (a == b)
                 {
                     digraphs.Add((a, 'X'));
+                    i++;
                 }
                 else
                 {
                     digraphs.Add((a, b));
-                    i++; // İkili harf kullandık, i'yi artır
+                    i += 2;
                 }
             }
 
-            if (cleanText.Length % 2 == 1)
+            // Eğer tek karakter kaldıysa (örneğin en son 'A' tek başına)
+            if (digraphs.Count > 0 && digraphs.Last().Item2 == 'X' && cleanText.Length % 2 == 0)
             {
-                digraphs.Add((cleanText.Last(), 'X'));
+                // bir şey yapmaya gerek yok, zaten X eklenmiş olur
             }
 
             return digraphs;
         }
 
-        public static string Encrypt(string plaintext)
+
+        public string Encrypt(string plaintext)
         {
             var digraphs = PrepareDigraphs(plaintext);
             StringBuilder sb = new();
@@ -104,7 +108,7 @@ namespace UdpChatting
             return sb.ToString();
         }
 
-        public static string Decrypt(string ciphertext)
+        public string Decrypt(string ciphertext)
         {
             List<(char, char)> digraphs = new();
             for (int i = 0; i < ciphertext.Length; i += 2)

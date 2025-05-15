@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
+﻿using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Threading.Tasks;
+
 namespace UdpChatting
 {
     public static class WiFiService
@@ -15,7 +12,7 @@ namespace UdpChatting
             {
                 if (ni.OperationalStatus == OperationalStatus.Up &&
                     ni.NetworkInterfaceType != NetworkInterfaceType.Loopback &&
-                    !ni.Description.ToLower().Contains("virtual") && 
+                    !ni.Description.ToLower().Contains("virtual") &&
                     !ni.Name.ToLower().Contains("virtual") &&
                     !ni.Description.ToLower().Contains("vmware"))
                 {
@@ -30,6 +27,5 @@ namespace UdpChatting
             }
             throw new Exception("IPv4 adresi bulunamadı!");
         }
-        
     }
 }

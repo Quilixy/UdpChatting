@@ -15,7 +15,7 @@
                    HorizontalOptions="Center" />
             
             <Entry x:Name="ipEntry" 
-                      Placeholder="Hedef IP Adresi" />
+                   Placeholder="Hedef IP Adresi" />
             
             <Entry x:Name="usernameEntry" 
                    Placeholder="Gönderen Kullanıcı Adı" />
